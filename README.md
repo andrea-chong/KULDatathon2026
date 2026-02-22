@@ -31,7 +31,10 @@ quantify distance between users (based on history of lexeme correctness)
 
 4. Learning Speed
 
-\text{learning*speed} = \frac{\text{vocab_size}}{\text{timestamp}*{max} - \text{timestamp}\_{min}}
+\[
+\text{learning_speed} = \frac{\text{vocab_size}}{\text{timestamp}_{\max} - \text{timestamp}_{\min}}
+\]
+
 Measures how quickly a learner acquires new vocabulary.
 
 ### Clustering algorithms
