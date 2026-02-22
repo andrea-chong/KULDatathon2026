@@ -1,2 +1,4 @@
 __pycache__/
 .env
+*.13m.csv
+data/learning_traces.13m.csv
