@@ -31,9 +31,7 @@ quantify distance between users (based on history of lexeme correctness)
 
 4. Learning Speed
 
-\[
-\text{learning_speed} = \frac{\text{vocab_size}}{\text{timestamp}_{\max} - \text{timestamp}_{\min}}
-\]
+learning_speed = vocab_size / (timestamp_max - timestamp_min)
 
 Measures how quickly a learner acquires new vocabulary.
 
@@ -68,13 +66,12 @@ Measures how quickly a learner acquires new vocabulary.
 
 ### Tasks
 
-Create feature matrix - by Mon 23rd Feb
-add Dataset B features
-Clustering tasks - by Wed 25th Feb before we meet
-K-means
-DBSCAN
-Agglo hierarchical
-Auto-encoder - Embeddings - by Tues 24th Feb
-Powerpoint - outline before we meet on Wed 25th Feb
+| Task                         | Deadline                    |
+| ---------------------------- | --------------------------- |
+| Build feature matrix         | Mon 23 Feb                  |
+| Integrate Dataset B features | Mon 23 Feb                  |
+| Autoencoder embeddings       | Tue 24 Feb                  |
+| Run clustering experiments   | Wed 25 Feb (before meeting) |
+| Slides outline               | Before Wed meeting          |
 
 This is the team repo for the KUL Datathon 2026 :)
