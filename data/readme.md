@@ -111,7 +111,7 @@ For each `(user_id, lexeme_code)` in Dataset A (Portuguese subset), compute:
 Pivot to a wide matrix (`lexeme_0 ... lexeme_2814`) and merge with the existing user fingerprint table to produce:
 - `user_fingerprint_B.csv`
 - `user_fingerprint_B_scaled.csv` (StandardScaler applied to all numeric columns)
-```
+
 ---
 
 ## 6. User Embedding Generation (SVD / SVD→AE)
