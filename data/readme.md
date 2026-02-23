@@ -112,3 +112,58 @@ Pivot to a wide matrix (`lexeme_0 ... lexeme_2814`) and merge with the existing 
 - `user_fingerprint_B.csv`
 - `user_fingerprint_B_scaled.csv` (StandardScaler applied to all numeric columns)
 ```
+---
+
+## 6. User Embedding Generation (SVD / SVD→AE)
+
+We provide two pipelines to generate user-level embeddings from `df_user_fp` (user aggregated features), which contains:
+
+- **Lexeme ability features**: `lexeme_*`
+- **Lexeme exposure features**: `lexeme_*_seen`
+- **Behavioral features**: `max_history_seen`, `vocab_size`, `learning_speed`
+
+Both pipelines end with **L2 normalization** so the embeddings work well with cosine similarity / clustering.
+
+We use the 2 piplines on both the direct user features and the features with information from dataset B (users_fingerprint_norm.csv and user_fingerprint_B_scaled.csv), resulting in 4 different datasets.
+
+### 6.1 SVD Reduction + Behavioral Late Fusion
+
+1. **Column grouping**
+   - `ability_cols`: all `lexeme_*` columns excluding `*_seen`, `user_id`, and behavioral columns
+   - `seen_cols`: all `lexeme_*_seen` columns
+   - `beh_cols`: `max_history_seen`, `vocab_size`, `learning_speed`
+
+2. **Behavioral preprocessing**
+   - Fill missing values with 0
+   - Clip each feature to \([-5, 5]\)
+   - Down-weight with `w_beh = 0.5`
+
+3. **Dimensionality reduction (linear)**
+   - Ability block: `TruncatedSVD(n_components=64)` → `E_ability` (64-d)
+   - Seen block: `log1p` + `TruncatedSVD(n_components=32)` → `E_seen` (32-d), then down-weight with `w_seen = 0.5`
+
+4. **Concatenation & output**
+   - Concatenate `[E_ability, E_seen, B]` → **99-d** embedding
+   - L2 normalize per user
+   - Export: `user_embedding_svd_ability_seen_beh.csv`
+
+### 6.2 SVD(512) → AutoEncoder(128) + Behavioral Late Fusion
+
+1. **Build a 512-d SVD representation**
+   - Ability: `TruncatedSVD(n_components=384)` → `Z_a`
+   - Seen: `log1p` + `TruncatedSVD(n_components=128)` → `Z_s`, then down-weight with `W_SEEN = 0.5`
+   - Concatenate `[Z_a, W_SEEN * Z_s]` → `Z` (512-d)
+   - Standardize `Z` with `StandardScaler` to stabilize AE training
+
+2. **Train a small AutoEncoder (non-linear compression)**
+   - Architecture: `512 → 256 → 128 → 256 → 512` (LayerNorm + GELU + Dropout)
+   - Objective: reconstruct `Z` using MSE loss
+   - Train/val split: 80/20, with early stopping (best validation loss)
+   - Output embedding: encoder bottleneck → **128-d** (`emb_ae`)
+
+3. **Behavioral late fusion & output**
+   - Behavioral features are **not used to train the AE**
+   - Fill missing values with 0, optionally standardize, clip to \([-5, 5]\), and down-weight with `W_BEH = 0.5`
+   - Concatenate `[emb_ae, B]` → **131-d** embedding
+   - L2 normalize per user
+   - Export: `user_embedding_svd512_ae128_plus_beh.csv`
