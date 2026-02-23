@@ -70,7 +70,7 @@ Lexemes that never appear in Dataset B will have missing `frequency` / `prompt_c
 ### 5.2 Compute lexeme weight
 For each lexeme \(l\), compute a raw weight:
 
-$$
+```math
 \mathrm{weight\_raw}(l)
 =
 \left(4p(1-p)\right)^{\beta}
@@ -78,27 +78,32 @@ $$
 \left(\sqrt{f}\right)^{\delta}
 \cdot
 \left(\sqrt{\mathrm{cov}}\right)^{\gamma}
-$$
+```
 
 - \(p\): `global_correctness` from Dataset A  
 - \(f\): `frequency` from Dataset B (NaN → default `0.01`)  
-- \(\mathrm{cov}\): `prompt_coverage` from Dataset B (NaN → default `0.01`)  
-- Hyperparameters: \(\beta=1.0,\ \delta=0.5,\ \gamma=0.5\)
+- `cov`: `prompt_coverage` from Dataset B (NaN → default `0.01`)  
+
+- Hyperparameters:
+
+```math
+\beta=1.0,\ \delta=0.5,\ \gamma=0.5
+```
 
 Then normalize:
 
-$$
+```math
 \mathrm{weight}(l) = \frac{\mathrm{weight\_raw}(l)}{\max(\mathrm{weight\_raw})}
-$$
+```
 
 So `weight ∈ [0, 1]`.
 
 ### 5.3 Build B-based user lexeme features
 For each `(user_id, lexeme_code)` in Dataset A (Portuguese subset), compute:
 
-$$
+```math
 \mathrm{feature\_score}(u,l) = r(u,l)\cdot \sqrt{\mathrm{weight}(l)}
-$$
+```
 
 - \(r(u,l)\): `history_acc_rate` (user’s historical correctness on that lexeme)
 - If a user has no record for a lexeme, the feature is `0`.
@@ -106,3 +111,4 @@ $$
 Pivot to a wide matrix (`lexeme_0 ... lexeme_2814`) and merge with the existing user fingerprint table to produce:
 - `user_fingerprint_B.csv`
 - `user_fingerprint_B_scaled.csv` (StandardScaler applied to all numeric columns)
+```
