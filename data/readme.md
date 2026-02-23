@@ -50,3 +50,59 @@ The fingerprint is composed of two parallel sets of columns for each lexeme (whe
 1.  **Learner Segmentation**: Use clustering to identify personas such as "The Natural" (High mastery, low exposure) vs. "The Grinder" (High mastery, high exposure).
 2.  **Difficulty Bottleneck Analysis**: Identify specific lexemes where `history_seen` is high but `ability_index` remains low across the user base.
 3.  **Dimensionality Reduction**: Given the doubled column count, using **TruncatedSVD** is highly recommended to extract latent features before feeding into any clustering or classification models.
+
+---
+
+## 5. Use information from Dataset B
+
+Dataset B (prompt–translation corpus) is used to estimate how “useful / representative” each lexeme is in real prompt contexts, and convert that into a **lexeme weight**. We then use this weight to build an additional user × lexeme feature matrix.
+
+### 5.1 Join Dataset B statistics onto each lexeme
+1. Parse `word` from `lexeme_string` (keep the surface/lemma part before tags like `<...>`).
+2. Convert `word` to a lookup token (`query_token`, usually the lemma after `/`, lowercased).
+3. From Dataset B, compute per token:
+   - `prompt_count`: number of prompts where the token appears  
+   - `prompt_coverage = prompt_count / total_prompts`
+   - `frequency`: average probability mass of the token within prompts (based on translation probabilities)
+
+Lexemes that never appear in Dataset B will have missing `frequency` / `prompt_coverage`.
+
+### 5.2 Compute lexeme weight
+For each lexeme \(l\), compute a raw weight:
+
+$$
+\mathrm{weight\_raw}(l)
+=
+\left(4p(1-p)\right)^{\beta}
+\cdot
+\left(\sqrt{f}\right)^{\delta}
+\cdot
+\left(\sqrt{\mathrm{cov}}\right)^{\gamma}
+$$
+
+- \(p\): `global_correctness` from Dataset A  
+- \(f\): `frequency` from Dataset B (NaN → default `0.01`)  
+- \(\mathrm{cov}\): `prompt_coverage` from Dataset B (NaN → default `0.01`)  
+- Hyperparameters: \(\beta=1.0,\ \delta=0.5,\ \gamma=0.5\)
+
+Then normalize:
+
+$$
+\mathrm{weight}(l) = \frac{\mathrm{weight\_raw}(l)}{\max(\mathrm{weight\_raw})}
+$$
+
+So `weight ∈ [0, 1]`.
+
+### 5.3 Build B-based user lexeme features
+For each `(user_id, lexeme_code)` in Dataset A (Portuguese subset), compute:
+
+$$
+\mathrm{feature\_score}(u,l) = r(u,l)\cdot \sqrt{\mathrm{weight}(l)}
+$$
+
+- \(r(u,l)\): `history_acc_rate` (user’s historical correctness on that lexeme)
+- If a user has no record for a lexeme, the feature is `0`.
+
+Pivot to a wide matrix (`lexeme_0 ... lexeme_2814`) and merge with the existing user fingerprint table to produce:
+- `user_fingerprint_B.csv`
+- `user_fingerprint_B_scaled.csv` (StandardScaler applied to all numeric columns)
