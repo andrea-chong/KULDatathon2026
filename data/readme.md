@@ -167,3 +167,13 @@ We use the 2 piplines on both the direct user features and the features with inf
    - Concatenate `[emb_ae, B]` → **131-d** embedding
    - L2 normalize per user
    - Export: `user_embedding_svd512_ae128_plus_beh.csv`
+
+## 7. Lexical-level Embeddings and clustering
+
+We use semantic and morphological features of lexemes to cluster them into groups as an alternative method to reduce dimensionality of lexical features (`lexeme_*` and `lexeme_*_seen`)
+
+1. Get the top (max 10) most frequently used translated sentences in which each lexeme is used.
+2. Use [CALE-XLLEX](https://huggingface.co/gabrielloiseau/CALE-XLLEX) model to generate semantic embeddings for the target lexeme in context.
+3. Concatenate embeddings with morphological features of lexeme
+4. Reduce dimensionality with UMAP
+5. Run HDBSCAN clustering to assign each lexeme to a cluster (~402 not assigned to any cluster)
