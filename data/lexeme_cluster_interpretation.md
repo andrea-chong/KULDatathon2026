@@ -1,4 +1,4 @@
-# 🧬 DuoBuddy: Semantic Cluster Definitions (Portuguese)
+# DuoBuddy: Semantic Cluster Definitions (Portuguese)
 
 This document defines the 81 semantic clusters generated via clustering algorithms on Duolingo lexemes. These clusters serve as the core dimensions for constructing the **User Capability Fingerprint**.
 
