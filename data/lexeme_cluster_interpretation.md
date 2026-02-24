@@ -39,7 +39,7 @@ This category is a key metric for the DuoBuddy matchmaking system to determine a
 
 ---
 
-## 🟡 III. Life Scenes & Physical Entities
+## III. Life Scenes & Physical Entities
 
 Describes concrete objects and scenarios in daily life, representing a user's vocabulary breadth across different contexts.
 
