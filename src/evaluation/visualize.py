@@ -15,69 +15,68 @@ import seaborn as sns
 from matplotlib.colors import LinearSegmentedColormap
 
 def visualize_hdbscan_3d(df, clusterer, name, save_dir):
-    # 1. 將 UMAP 設定為 3 維輸出
-    reducer = umap.UMAP(n_components=3, random_state=42)
+    BG_WHITE = '#FFFFFF'
+    DUO_GREEN = '#58CC02'      # 標誌綠
+    DUO_DARK_TEXT = '#4B4B4B'  # 深灰文字
+    GRID_LIGHT = '#F5F5F5'     # 極輕背景格線
     
-    # 排除非數值列
+    reducer = umap.UMAP(n_components=3, random_state=42)
     exclude_cols = ['user_id', 'cluster_label', 'cluster_probability', 'soft_cluster_label','soft_cluster_score']
     features = df.drop(columns=exclude_cols, errors='ignore')
     embedding = reducer.fit_transform(features)
     
-    # 建立畫布：左邊 3D 散點圖，右邊 2D 壓縮樹
-    fig = plt.figure(figsize=(20, 8))
-    ax1 = fig.add_subplot(1, 2, 1, projection='3d') # 指定 3D 投影
-    ax2 = fig.add_subplot(1, 2, 2)
-    
     labels = df['cluster_label']
     clustered = (labels >= 0)
-    
-    # --- 1. 3D UMAP Plot ---
-    # 繪製雜訊 (Noise)
-    ax1.scatter(embedding[~clustered, 0], 
-                embedding[~clustered, 1], 
-                embedding[~clustered, 2], 
-                color='lightgray', s=5, alpha=0.2, label='Noise')
-    
-    # 繪製聚類 (Clusters)
     unique_labels = sorted(list(set(labels[clustered])))
-    n_clusters = len(unique_labels)
-    # 使用與樹狀圖一致的顏色盤
-    colors = sns.color_palette('Spectral', n_clusters)
     
-    scatter = ax1.scatter(embedding[clustered, 0], 
-                         embedding[clustered, 1], 
-                         embedding[clustered, 2], 
-                         c=labels[clustered], s=20, cmap='Spectral', alpha=0.7)
+    fig = plt.figure(figsize=(14, 10), facecolor=BG_WHITE)
+    ax = fig.add_subplot(1, 1, 1, projection='3d')
+    ax.set_facecolor(BG_WHITE)
     
-    # 在 3D 空間添加中心點標籤
-    for i, label in enumerate(unique_labels):
+    ax.scatter(embedding[~clustered, 0], embedding[~clustered, 1], embedding[~clustered, 2], 
+                color='#EFEFEF', s=10, alpha=0.2, label='Noise')
+    
+    scatter = ax.scatter(embedding[clustered, 0], embedding[clustered, 1], embedding[clustered, 2], 
+                         c=labels[clustered], s=40, cmap='Spectral', alpha=0.85, edgecolors='none')
+    
+    for label in unique_labels:
         mask = (labels == label)
-        # 計算 3D 中位數位置
-        median_pos = np.median(embedding[mask], axis=0)
-        ax1.text(median_pos[0], median_pos[1], median_pos[2], 
-                 str(label), fontsize=12, fontweight='bold',
-                 bbox=dict(facecolor='white', alpha=0.6, edgecolor='none'))
+        if np.any(mask):
+            pos = np.median(embedding[mask], axis=0)
+            z_offset = (embedding[:, 2].max() - embedding[:, 2].min()) * 0.05
+            
+            ax.text(pos[0], pos[1], pos[2] + z_offset, 
+                    str(label), 
+                    fontsize=10, 
+                    fontweight='black', 
+                    color=DUO_DARK_TEXT,
+                    zorder=100,           
+                    horizontalalignment='center',
+                    verticalalignment='bottom',
+                    bbox=dict(facecolor='white', 
+                              alpha=0.9, 
+                              edgecolor=DUO_GREEN, 
+                              boxstyle='round,pad=0.4', 
+                              linewidth=1.5))
+    ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    
+    ax.xaxis._axinfo["grid"]['color'] = GRID_LIGHT
+    ax.yaxis._axinfo["grid"]['color'] = GRID_LIGHT
+    ax.zaxis._axinfo["grid"]['color'] = GRID_LIGHT
+    
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.set_zticklabels([])
 
-    ax1.set_title(f'3D UMAP Projection: {name}')
-    ax1.set_xlabel('UMAP 1')
-    ax1.set_ylabel('UMAP 2')
-    ax1.set_zlabel('UMAP 3')
-    # 調整視角，讓初始呈現更有立體感
-    ax1.view_init(elev=20, azim=45)
-
-    # --- 2. Condensed Tree (維持 2D，因為樹狀結構不適合 3D) ---
-    plt.sca(ax2) 
-    dark_grey_cmap = LinearSegmentedColormap.from_list('dark_grey', ['0.9', '0.0'])
-    clusterer.condensed_tree_.plot(select_clusters=True,
-                                   selection_palette=colors,
-                                   label_clusters=False,
-                                   cmap=dark_grey_cmap                 
-                                   )
-    ax2.set_title(f'Condensed Tree (Stability): {name}')
+    ax.set_title('UMAP 3D PERSPECTIVE', size=24, fontweight='black', color=DUO_DARK_TEXT, pad=30)
+    
+    ax.view_init(elev=25, azim=40)
     
     plt.tight_layout()
     os.makedirs(save_dir, exist_ok=True)
-    plt.savefig(f'{save_dir}/{name}_3D_dashboard.png')
+    plt.savefig(f'{save_dir}/{name}_3D_UMAP_Duo.png', dpi=300, facecolor=BG_WHITE)
     plt.show()
     
 def visualize_hdbscan_with_labels(df, clusterer, name, save_dir):
@@ -200,7 +199,7 @@ def plot_all_clusters_radar_grid(df, importance_dict, n_cols=5):
 
     for j in range(i + 1, len(axes)):
         axes[j].axis('off')
-        
+
     plt.tight_layout(rect=[0, 0.05, 1, 0.95])
     plt.suptitle('SKILL PROFICIENCY DASHBOARD', 
                  size=28, weight='black', color=DUO_DARK_TEXT, y=0.98)
