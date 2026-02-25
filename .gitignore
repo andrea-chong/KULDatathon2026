@@ -4,3 +4,4 @@ __pycache__/
 data/learning_traces.13m.csv
 environment.yml
 data/tmp
+.DS_Store
