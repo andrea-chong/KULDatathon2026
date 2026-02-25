@@ -145,63 +145,69 @@ def plot_cluster_top_features_boxplot(df, cluster_id, importance_dict):
     plt.show()
 
 def plot_all_clusters_radar_grid(df, importance_dict, n_cols=5):
-    # 1. 取得所有群集 ID (排除雜訊 -1)
+    BG_WHITE = '#FFFFFF'       
+    DUO_GREEN = '#58CC02'      
+    DUO_DARK_TEXT = '#4B4B4B'  
+    ACCENT_YELLOW = '#FFC800'  
+    GRID_GRAY = '#E5E5E5'      
+
     unique_clusters = sorted([c for c in df['cluster_label'].unique() if c >= 0])
-    n_clusters = len(unique_clusters)
-    n_rows = (n_clusters + n_cols - 1) // n_cols  # 自動計算需要的行數
+    n_rows = (len(unique_clusters) + n_cols - 1) // n_cols
+
+    plt.rcParams['text.color'] = DUO_DARK_TEXT
+    plt.rcParams['axes.labelcolor'] = DUO_DARK_TEXT
     
-    # 2. 建立大圖
     fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 4, n_rows * 4), 
-                             subplot_kw=dict(polar=True))
-    axes = axes.flatten()  # 將多維矩陣拉平，方便迴圈讀取
+                             subplot_kw=dict(polar=True), facecolor=BG_WHITE)
+    axes = axes.flatten()
     
-    # 3. 事先標準化所有可能用到的特徵 (全域標準化，比較才有意義)
-    all_features = set()
-    for features in importance_dict.values():
-        all_features.update(features.index[:5])
-    all_features = list(all_features)
-    
-    scaler = MinMaxScaler()
+    all_feats = list(set([f for sub in importance_dict.values() for f in sub.index[:5]]))
     df_norm = df.copy()
-    df_norm[all_features] = scaler.fit_transform(df[all_features])
+    df_norm[all_feats] = MinMaxScaler().fit_transform(df[all_feats])
     
-    # 4. 開始繪製每個群集
     for i, cluster_id in enumerate(unique_clusters):
         ax = axes[i]
+        ax.set_facecolor(BG_WHITE)
         
-        # 取得該群集的前 5 大特徵
         top_features = list(importance_dict[cluster_id].index[:5])
+        clean_features = [f.replace('_', ' ').title() for f in top_features]
         
-        # 計算數值
-        cluster_stats = df_norm[df_norm['cluster_label'] == cluster_id][top_features].mean()
-        global_stats = df_norm[top_features].mean()
+        stats = df_norm[df_norm['cluster_label'] == cluster_id][top_features].mean().tolist()
+        g_mean = df_norm[top_features].mean().tolist()
         
-        # 雷達圖幾何設定
-        angles = np.linspace(0, 2 * np.pi, len(top_features), endpoint=False).tolist()
-        angles += angles[:1]
-        stats = cluster_stats.tolist() + cluster_stats.tolist()[:1]
-        global_mean = global_stats.tolist() + global_stats.tolist()[:1]
+        angles = np.linspace(0, 2*np.pi, len(top_features), endpoint=False).tolist()
+        angles += angles[:1]; stats += stats[:1]; g_mean += g_mean[:1]
         
-        # 繪圖
-        ax.fill(angles, stats, color='teal', alpha=0.25)
-        ax.plot(angles, stats, color='teal', linewidth=2)
-        ax.plot(angles, global_mean, color='gray', linewidth=1, linestyle='--', alpha=0.5)
+        ax.fill(angles, stats, color=DUO_GREEN, alpha=0.2)
         
-        # 設定刻度與標籤
-        ax.set_ylim(0, 1.1) # 統一比例尺
-        ax.set_yticklabels([])
+        ax.plot(angles, stats, color=DUO_GREEN, linewidth=3.5, zorder=5)
+        
+        ax.scatter(angles, stats, color=ACCENT_YELLOW, s=40, zorder=10, 
+                   edgecolors=DUO_GREEN, linewidth=1.5)
+        
+        ax.plot(angles, g_mean, color=DUO_DARK_TEXT, linewidth=1, linestyle='--', alpha=0.3)
+        
+        ax.spines['polar'].set_visible(False) 
+        ax.xaxis.grid(True, color=GRID_GRAY, linestyle='-', linewidth=1)
+        ax.yaxis.grid(True, color=GRID_GRAY, linestyle='-', linewidth=1)
+        
+        ax.set_ylim(0, 1.1)
         ax.set_xticks(angles[:-1])
-        ax.set_xticklabels(top_features, fontsize=8)
-        ax.set_title(f'Cluster {cluster_id}', size=12, pad=10)
+        ax.set_xticklabels(clean_features, fontsize=10, fontweight='bold', color=DUO_DARK_TEXT)
+        ax.set_yticklabels([])
+        
+        ax.set_title(f'Group {cluster_id}', size=18, pad=30, fontweight='black', color=DUO_GREEN)
 
-    # 5. 隱藏沒用到的空白子圖
     for j in range(i + 1, len(axes)):
         axes[j].axis('off')
         
-    plt.tight_layout()
-    plt.suptitle('All Clusters Feature Profiles', size=20, y=1.02)
-    plt.show()
+    plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+    plt.suptitle('SKILL PROFICIENCY DASHBOARD', 
+                 size=28, weight='black', color=DUO_DARK_TEXT, y=0.98)
     
+    plt.show()
+    plt.rcParams.update(plt.rcParamsDefault)
+
 def plot_cluster_top_features_radar(df, cluster_id, importance_dict):
     # 1. Get top 5 features for this cluster
     top_features = list(importance_dict[cluster_id].index[:5])
