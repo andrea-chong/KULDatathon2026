@@ -8,10 +8,12 @@ from scipy.cluster.hierarchy import dendrogram
 
 def visualize_ahc_with_labels(df, Z, name, save_dir, n_clusters=None):
     """
-    Creates a 3-row vertical dashboard:
-      1. PCA projection colored by cluster labels
-      2. UMAP projection colored by cluster labels
-      3. Dendrogram from the linkage matrix
+    Creates a 5-row vertical dashboard:
+      1. PCA 2D
+      2. PCA 3D
+      3. UMAP 2D
+      4. UMAP 3D
+      5. Dendrogram
     """
     from sklearn.decomposition import PCA
     import umap
@@ -21,46 +23,69 @@ def visualize_ahc_with_labels(df, Z, name, save_dir, n_clusters=None):
     unique_labels = sorted(set(labels))
     n_clusters_found = len(unique_labels)
 
-    pca_embedding = PCA(n_components=2).fit_transform(features)
-    umap_embedding = umap.UMAP(random_state=42).fit_transform(features)
+    # Compute projections
+    pca_2d = PCA(n_components=2).fit_transform(features)
+    pca_3d = PCA(n_components=3).fit_transform(features)
+    umap_2d = umap.UMAP(n_components=2, random_state=42).fit_transform(features)
+    umap_3d = umap.UMAP(n_components=3, random_state=42).fit_transform(features)
 
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(14, 22))
+    fig = plt.figure(figsize=(14, 36))
 
-    # --- 1. PCA Plot ---
-    ax1.scatter(pca_embedding[:, 0], pca_embedding[:, 1],
+    # --- 1. PCA 2D ---
+    ax1 = fig.add_subplot(5, 1, 1)
+    ax1.scatter(pca_2d[:, 0], pca_2d[:, 1],
                 c=labels, s=15, cmap='Spectral', alpha=0.8)
     for label in unique_labels:
         mask = (labels == label)
-        mx, my = np.median(pca_embedding[mask], axis=0)
+        mx, my = np.median(pca_2d[mask], axis=0)
         ax1.text(mx, my, str(label), fontsize=12, fontweight='bold',
                  bbox=dict(facecolor='white', alpha=0.7, edgecolor='none'))
-    ax1.set_title(f'PCA Projection: {name}')
+    ax1.set_title(f'PCA 2D: {name}')
     ax1.set_xlabel('PC1')
     ax1.set_ylabel('PC2')
 
-    # --- 2. UMAP Plot ---
-    ax2.scatter(umap_embedding[:, 0], umap_embedding[:, 1],
+    # --- 2. PCA 3D ---
+    ax2 = fig.add_subplot(5, 1, 2, projection='3d')
+    ax2.scatter(pca_3d[:, 0], pca_3d[:, 1], pca_3d[:, 2],
+                c=labels, s=15, cmap='Spectral', alpha=0.8)
+    ax2.set_title(f'PCA 3D: {name}')
+    ax2.set_xlabel('PC1')
+    ax2.set_ylabel('PC2')
+    ax2.set_zlabel('PC3')
+
+    # --- 3. UMAP 2D ---
+    ax3 = fig.add_subplot(5, 1, 3)
+    ax3.scatter(umap_2d[:, 0], umap_2d[:, 1],
                 c=labels, s=15, cmap='Spectral', alpha=0.8)
     for label in unique_labels:
         mask = (labels == label)
-        mx, my = np.median(umap_embedding[mask], axis=0)
-        ax2.text(mx, my, str(label), fontsize=12, fontweight='bold',
+        mx, my = np.median(umap_2d[mask], axis=0)
+        ax3.text(mx, my, str(label), fontsize=12, fontweight='bold',
                  bbox=dict(facecolor='white', alpha=0.7, edgecolor='none'))
-    ax2.set_title(f'UMAP Projection: {name}')
+    ax3.set_title(f'UMAP 2D: {name}')
 
-    # --- 3. Dendrogram ---
+    # --- 4. UMAP 3D ---
+    ax4 = fig.add_subplot(5, 1, 4, projection='3d')
+    ax4.scatter(umap_3d[:, 0], umap_3d[:, 1], umap_3d[:, 2],
+                c=labels, s=15, cmap='Spectral', alpha=0.8)
+    ax4.set_title(f'UMAP 3D: {name}')
+    ax4.set_xlabel('UMAP1')
+    ax4.set_ylabel('UMAP2')
+    ax4.set_zlabel('UMAP3')
+
+    # --- 5. Dendrogram ---
+    ax5 = fig.add_subplot(5, 1, 5)
     p = min(30, n_clusters_found * 3) if n_clusters_found else 30
-    dendrogram(Z, ax=ax3, truncate_mode='lastp', p=p,
+    dendrogram(Z, ax=ax5, truncate_mode='lastp', p=p,
                leaf_rotation=90, leaf_font_size=8, color_threshold=0)
-    ax3.set_title(f'Dendrogram: {name}')
-    ax3.set_xlabel('Cluster Size (or Sample Index)')
-    ax3.set_ylabel('Distance')
+    ax5.set_title(f'Dendrogram: {name}')
+    ax5.set_xlabel('Cluster Size (or Sample Index)')
+    ax5.set_ylabel('Distance')
 
     plt.tight_layout()
     os.makedirs(save_dir, exist_ok=True)
     plt.savefig(f'{save_dir}/{name}_dashboard.png', dpi=150)
     plt.show()
-
 def plot_cluster_top_features_boxplot(df, cluster_id, importance_dict):
     """Same as HDBSCAN version — works with any cluster_label column."""
     top_features = importance_dict[cluster_id].index[:3]
