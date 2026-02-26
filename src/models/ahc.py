@@ -1,12 +1,12 @@
-from sklearn.cluster import AgglomerativeClustering
-from sklearn.decomposition import PCA
-from sklearn.ensemble import RandomForestClassifier
-from scipy.cluster.hierarchy import linkage, fcluster
 import os
+import pickle
 import numpy as np
 import pandas as pd
-import pickle
 
+from sklearn.decomposition import PCA
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.ensemble import RandomForestClassifier
+from scipy.cluster.hierarchy import linkage, fcluster
 
 def run_ahc_pipeline(df, user_col='user_id', n_components=30, n_clusters=10, linkage_method='ward', distance_threshold=None):
     """

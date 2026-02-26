@@ -1,6 +1,7 @@
-from sentence_transformers import SentenceTransformer
-import pandas as pd
 import numpy as np
+import pandas as pd
+
+from sentence_transformers import SentenceTransformer
 
 sentences_df = pd.read_parquet("data/tmp/sentences_df.parquet")
 

@@ -1,6 +1,7 @@
 # DuoBuddy: Semantic Cluster Definitions (Portuguese)
 
-This document defines the 81 semantic clusters generated via clustering algorithms on Dataset B (2020 STAPLE Shared Task Data). These clusters serve as the core dimensions for constructing the **User Capability Fingerprint**.
+This document details the 81 Semantic Lexeme Clusters derived from Dataset B (2020 STAPLE Shared Task). These clusters function as the foundational latent dimensions for our User Capability Fingerprint, enabling a high-resolution mapping of learner proficiency. The granular cluster assignments for each lexeme are documented in:
+`data/final/lexeme_cluster_results.csv`
 
 ---
 

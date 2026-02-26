@@ -1,6 +1,21 @@
-# Data Description: User Fingerprint Matrix (`df_user_fp`)
+# Data Description: User Fingerprint Matrix
 
-This document describes the structure and logic of the `df_user_fp` dataset. This matrix serves as a multi-dimensional "Digital Fingerprint" for learners, integrating macro-level behavioral statistics, micro-level proficiency scores, and exposure intensity across specific linguistic lexemes.
+This document describes the structure and logic of the `/raw/users_fingerprint.csv` dataset. This matrix serves as a multi-dimensional "Digital Fingerprint" for learners, integrating macro-level behavioral statistics, micro-level proficiency scores, and exposure intensity across specific linguistic lexemes.
+
+---
+
+## Overall Data Pipeline & Matchmaking Logic
+
+Our engine transforms raw learning logs into high-dimensional user "fingerprints" through a multi-stage pipeline:
+
+1.  **Lexeme Semantic Embedding**:
+    Generating vector representations for all vocabulary. We use **HDBSCAN** on these semantic embeddings (found in `/final/lexeme_embed_cluster_results.parquet`) to identify **81 stable lexeme archetypes**.
+2.  **Feature Fusion**:
+    Integrating **User Historical Performance** with these **81 Semantic Archetypes**. This captures not just _if_ a user knows a word, but their mastery across semantically related linguistic groups.
+3.  **User Clustering**:
+    Utilizing **HDBSCAN** on `/final/user_fingerprint_B_lex_clusters_scaled.csv` to identify stable **Learner Archetypes** (The Twins & The Opposites).
+
+---
 
 ## 1. Behavioral Features (User-Level Statistics)
 
@@ -58,16 +73,18 @@ The fingerprint is composed of two parallel sets of columns for each lexeme (whe
 Dataset B (prompt–translation corpus) is used to estimate how “useful / representative” each lexeme is in real prompt contexts, and convert that into a **lexeme weight**. We then use this weight to build an additional user × lexeme feature matrix.
 
 ### 5.1 Join Dataset B statistics onto each lexeme
+
 1. Parse `word` from `lexeme_string` (keep the surface/lemma part before tags like `<...>`).
 2. Convert `word` to a lookup token (`query_token`, usually the lemma after `/`, lowercased).
 3. From Dataset B, compute per token:
-   - `prompt_count`: number of prompts where the token appears  
+   - `prompt_count`: number of prompts where the token appears
    - `prompt_coverage = prompt_count / total_prompts`
    - `frequency`: average probability mass of the token within prompts (based on translation probabilities)
 
 Lexemes that never appear in Dataset B will have missing `frequency` / `prompt_coverage`.
 
 ### 5.2 Compute lexeme weight
+
 For each lexeme \(l\), compute a raw weight:
 
 ```math
@@ -80,9 +97,9 @@ For each lexeme \(l\), compute a raw weight:
 \left(\sqrt{\mathrm{cov}}\right)^{\gamma}
 ```
 
-- \(p\): `global_correctness` from Dataset A  
-- \(f\): `frequency` from Dataset B (NaN → default `0.01`)  
-- `cov`: `prompt_coverage` from Dataset B (NaN → default `0.01`)  
+- \(p\): `global_correctness` from Dataset A
+- \(f\): `frequency` from Dataset B (NaN → default `0.01`)
+- `cov`: `prompt_coverage` from Dataset B (NaN → default `0.01`)
 
 - Hyperparameters:
 
@@ -99,6 +116,7 @@ Then normalize:
 So `weight ∈ [0, 1]`.
 
 ### 5.3 Build B-based user lexeme features
+
 For each `(user_id, lexeme_code)` in Dataset A (Portuguese subset), compute:
 
 ```math
@@ -109,6 +127,7 @@ For each `(user_id, lexeme_code)` in Dataset A (Portuguese subset), compute:
 - If a user has no record for a lexeme, the feature is `0`.
 
 Pivot to a wide matrix (`lexeme_0 ... lexeme_2814`) and merge with the existing user fingerprint table to produce:
+
 - `user_fingerprint_B.csv`
 - `user_fingerprint_B_scaled.csv` (StandardScaler applied to all numeric columns)
 

@@ -1,19 +1,15 @@
-import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
-import seaborn as sns
-import numpy as np
-import umap
 import os
+import umap
 import random 
-from sklearn.preprocessing import MinMaxScaler
-
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D 
-import umap
 import numpy as np
-import os
 import seaborn as sns
+import matplotlib.pyplot as plt
+
+from mpl_toolkits.mplot3d import Axes3D 
+from sklearn.preprocessing import MinMaxScaler
 from matplotlib.colors import LinearSegmentedColormap
+
+
 
 def visualize_hdbscan_3d(df, clusterer, name, save_dir):
     BG_WHITE = '#FFFFFF'

@@ -15,6 +15,18 @@ In language learning, **"loneliness"** is a primary driver of attrition. DuoBudd
 
 ---
 
+## User Segmentation & Proficiency Visualization
+
+The dashboard below visualizes the results of our user clustering engine (HDBSCAN), transforming raw learning data into actionable social cohorts.
+
+![DuoBuddy Groups Dashboard](results/User_groups_Dashboard.png)
+
+To understand the specific linguistic profiles (e.g., which grammar rules or vocabulary sets Lex Cluster 5 or Lex Cluster 12 specializes in), please refer to our detailed mapping file:
+
+👉 [**/data/lexeme_cluster_interpretation.md**](/data/lexeme_cluster_interpretation.md)
+
+---
+
 ## Data Synergy & Experimental Scope
 
 This project deeply integrates the two core datasets provided for this competition. **Notably, to ensure the integrity of the model features, the initial phase focuses exclusively on Portuguese (pt) learners. Portuguese data is the only subset consistently and comprehensively represented across both Dataset A and Dataset B, allowing us to build a highly accurate cross-dataset feature matrix.**
@@ -54,6 +66,10 @@ _Where $V_{unique}$ is the total unique lexemes encountered, and $T$ represents 
 | **Progress**   | **User Level Proxy** | Uses maximum exposure to locate the user on the overall learning path.                 |
 | **Efficiency** | **Learning Speed**   | Vocabulary acquisition per unit of time; distinguishes "sprinters" from "marathoners." |
 
+To understand the specific processed file, please refer to our data description file:
+
+👉 [**/data/readme.md**](/data/readme.md)
+
 ---
 
 ## Clustering & Matchmaking Strategy
@@ -61,9 +77,13 @@ _Where $V_{unique}$ is the total unique lexemes encountered, and $T$ represents 
 To achieve high-precision pairing, we experimented with the following algorithmic paths:
 
 - **K-Means (Baseline):** Establishing fundamental learner segments.
-- **DBSCAN:** Identifying natural "skill pockets" while filtering out outliers or bot-like behavior.
+- **HDBSCAN:** Identifying natural "skill pockets" while filtering out outliers or bot-like behavior.
 - **Autoencoder Embeddings:** Utilizing neural networks to capture non-linear relationships, compressing 81-dimensional features into a **Latent Space** for deep matching.
 - **Distance Metric:** Employs **Cosine Similarity** to measure feature orientation, ensuring users with similar "capability structures" are matched together.
+
+The clustering result base on HDBSCAN as shown in below:
+
+![DuoBuddy Clusters Result HDBSCAN](results/User_cluster_HDBSCAN.png)
 
 ---
 
@@ -99,7 +119,7 @@ Utilizing our **calculated User Fingerprints** and clustering algorithms, we env
 
 This project is a submission for the **KU Leuven Datathon 2026**.
 
-> **"We don't just match users; we match minds."** 🦉
+> **"We don't just match users; we match minds."**
 
 ---
 

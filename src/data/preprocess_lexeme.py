@@ -1,5 +1,6 @@
-import pandas as pd
 import re
+import pandas as pd
+
 
 def parse_word_from_lexeme_string(s: str) -> str:
     """

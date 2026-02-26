@@ -1,8 +1,9 @@
-import hdbscan
-from sklearn.decomposition import PCA
 import os
+import hdbscan
 import numpy as np
 import pandas as pd
+
+from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 
 def run_hdbscan_pipeline(df, user_col='user_id', n_components=30, epsilon=0, min_cluster_size=15, min_samples=5):
