@@ -110,8 +110,8 @@ Utilizing our **calculated User Fingerprints** and clustering algorithms, we env
 - [x] **Feature Matrix:** Construction of the base feature matrix (Feb 22)
 - [x] **Data Fusion:** Integrating Dataset A & B - Focus on 'pt' subset (Feb 23)
 - [x] **Autoencoder:** Training and extracting latent feature embeddings (Feb 24)
-- [ ] **Clustering Experiments:** Evaluating multi-model results for optimal pairing (Feb 25 AM)
-- [ ] **Final Pitch:** Completing 3D t-SNE visualizations and final presentation (Feb 25 PM)
+- [x] **Clustering Experiments:** Evaluating multi-model results for optimal pairing (Feb 25 AM)
+- [x] **Final Pitch:** Completing 3D t-SNE visualizations and final presentation (Feb 25 PM)
 
 ---
 
