@@ -1,6 +1,8 @@
 import numpy as np
-from sklearn.neighbors import NearestNeighbors
+
 from sklearn.utils import resample
+from sklearn.neighbors import NearestNeighbors
+
 
 def hopkins_statistic(X, sampling_size=0.1):
     """
