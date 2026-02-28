@@ -31,12 +31,12 @@ To understand the specific linguistic profiles (e.g., which grammar rules or voc
 
 This project deeply integrates the two core datasets provided for this competition. **Notably, to ensure the integrity of the model features, the initial phase focuses exclusively on Portuguese (pt) learners. Portuguese data is the only subset consistently and comprehensively represented across both Dataset A and Dataset B, allowing us to build a highly accurate cross-dataset feature matrix.**
 
-### 1. Dataset A (Spaced Repetition Data) — Capturing Memory Dynamics
+### 1. Dataset A ([Spaced Repetition Data](https://github.com/duolingo/halflife-regression)) — Capturing Memory Dynamics
 
 - **Utility:** Provides the forgetting curves and practice history for individual lexemes.
 - **Metrics:** Utilizes `history_seen` and `history_correct` to define a user's "learning stability" over a temporal axis.
 
-### 2. Dataset B (2020 STAPLE Shared Task Data) — Capturing Semantic Breadth
+### 2. Dataset B ([2020 STAPLE Shared Task Data](https://sharedtask.duolingo.com/)) — Capturing Semantic Breadth
 
 - **Utility:** Enriches lexemes with semantic context and translation diversity.
 - **Metrics:** Clusters thousands of lexemes into **81 Semantic Clusters** (e.g., tenses, daily life, syntax), defining the "depth and breadth" of a user's capability fingerprint.
