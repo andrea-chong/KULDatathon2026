@@ -117,7 +117,9 @@ Utilizing our **calculated User Fingerprints** and clustering algorithms, we env
 
 ## About Us
 
-This project is a submission for the **KU Leuven Datathon 2026**.
+This project is a submission for the **KU Leuven Datathon 2026**. 
+Team members:
+Andrea Chong, Atwin Paramudya, Shun-Yu Yeh, Xuanang Li, Yen-Hsun Li
 
 > **"We don't just match users; we match minds."**
 
